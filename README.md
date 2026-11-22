@@ -83,7 +83,18 @@ curl -X POST localhost:8000/chat -H 'content-type: application/json' -d '{"messa
 | Endpoint | Purpose |
 |----------|---------|
 | `GET /health` | Liveness check, returns `{"status":"ok"}` |
-| `POST /chat` | `{"message": "..."}` → `{"reply": "..."}` |
+| `POST /chat` | `{"message": "..."}` → `{"reply": "...", "model": "...", "usage": {"input_tokens", "output_tokens", "cost_usd"}}` |
+
+Gateway errors always use one shape, `{"error": {"code": "...", "message": "..."}}`. Upstream details are logged server-side and never returned to clients:
+
+| Situation | HTTP | `code` |
+|-----------|------|--------|
+| Provider rate-limits the gateway | `429` | `upstream_rate_limited` |
+| Provider returns an error (e.g. bad upstream key) | `502` | `upstream_error` |
+| Provider unreachable | `503` | `upstream_unavailable` |
+| Bad gateway config (e.g. unknown `LLM_PROVIDER`) | `500` | `gateway_misconfigured` |
+
+Invalid request bodies get FastAPI's standard `422`.
 
 ## Provider-neutral by design
 
