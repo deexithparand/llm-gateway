@@ -96,6 +96,27 @@ Gateway errors always use one shape, `{"error": {"code": "...", "message": "..."
 
 Invalid request bodies get FastAPI's standard `422`.
 
+## Smoke test
+
+`scripts/smoke_test.sh` starts a throwaway server for each scenario on port 8001, sends real HTTP requests and checks status codes and response bodies. Error scenarios override one env var for that run only, so `.env` is never touched.
+
+```bash
+./scripts/smoke_test.sh              # all checks (1 real LLM call, ~$0.001)
+SKIP_LLM=1 ./scripts/smoke_test.sh   # no LLM call (free, works offline except the 502 check)
+PORT=9000 ./scripts/smoke_test.sh    # if 8001 is busy
+```
+
+Exits `0` if all checks pass and `1` otherwise, so it can run in CI as-is.
+
+| Scenario | Override | Expected |
+|----------|----------|----------|
+| Health / docs | — | `200` |
+| Empty, missing or invalid-JSON message | — | `422` |
+| Real LLM reply | — | `200` with `usage.input_tokens` |
+| Bad upstream key | `LLM_API_KEY=not-a-real-key` | `502 upstream_error` |
+| Upstream unreachable | `LLM_BASE_URL=http://127.0.0.1:9` | `503 upstream_unavailable` |
+| Unknown provider | `LLM_PROVIDER=foo` | `500 gateway_misconfigured` |
+
 ## Provider-neutral by design
 
 Callers of the gateway never see provider names. Everything goes through `app/llm.py`:
