@@ -56,6 +56,8 @@ Think of it as an **API gateway / reverse proxy built for LLM traffic**. It play
 ```
 llm-gateway/
 ├── app/
+│   ├── main.py         # FastAPI app: GET /health, POST /chat
+│   ├── schemas.py      # request/response models (ChatRequest, ChatResponse)
 │   └── llm.py          # provider-neutral LLM client: complete() -> LLMResult
 ├── scripts/
 │   └── hello.py        # Block 1: first call through app/llm.py
@@ -72,7 +74,16 @@ python3 -m venv .venv && source .venv/bin/activate
 pip install -r requirements.txt
 cp .env.example .env        # then put your key in LLM_API_KEY
 python -m scripts.hello     # prints reply + token counts
+
+uvicorn app.main:app --reload   # start the gateway on :8000
+# open http://127.0.0.1:8000/docs  (interactive API docs)
+curl -X POST localhost:8000/chat -H 'content-type: application/json' -d '{"message":"hello"}'
 ```
+
+| Endpoint | Purpose |
+|----------|---------|
+| `GET /health` | Liveness check, returns `{"status":"ok"}` |
+| `POST /chat` | `{"message": "..."}` → `{"reply": "..."}` |
 
 ## Provider-neutral by design
 
