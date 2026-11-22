@@ -6,7 +6,7 @@ Learn-by-doing plan for Sunday, 2026-11-22. Each block gets its own branch (`fea
 |---|------|-------|---------------|-----------|--------|--------|
 | 1 | 14:00–14:25 | LLM API basics | Python script sends "hello" to Claude | Reply + token counts print | `feature/01-llm-basics` | ✅ Done |
 | 2 | 14:25–14:55 | FastAPI basics | `POST /chat` that echoes the input | Echo works via `/docs` | `feature/02-fastapi-echo` | ✅ Done |
-| 3 | 14:55–15:25 | Connect them | `/chat` calls Claude and returns the reply | First mini gateway answers | `feature/03-chat-claude` | ⬜ |
+| 3 | 14:55–15:25 | Connect them | `/chat` calls Claude and returns the reply | First mini gateway answers | `feature/03-chat-claude` | ✅ Done |
 | — | 15:25–15:45 | Lunch | | | | |
 | 4 | 15:45–16:15 | Auth | Hardcoded API keys mapped to user + team | Bad key → `401` | `feature/04-auth` | ⬜ |
 | 5 | 16:15–16:45 | Rate limit | Max 5 requests/min per user, in memory | 6th request → `429` | `feature/05-rate-limit` | ⬜ |
