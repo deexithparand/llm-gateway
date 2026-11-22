@@ -43,7 +43,7 @@ Think of it as an **API gateway / reverse proxy built for LLM traffic**. It play
 | Layer | Tech | Why |
 |-------|------|-----|
 | Language | Python 3.14 | The first-class Anthropic SDK and FastAPI ecosystem |
-| LLM | Claude via the `anthropic` Python SDK | Official SDK; returns token usage on every response |
+| LLM | Claude (`claude-sonnet-5-5`) through KodeKloud KodeKey, using the `anthropic` SDK inside a provider-neutral adapter (`app/llm.py`) | Official SDK; returns token usage on every response; adapter keeps the gateway provider-agnostic |
 | API framework | FastAPI + Uvicorn | Async, typed request models, free interactive docs at `/docs` |
 | Database | PostgreSQL (Docker) | Stores usage logs; SQL makes the monthly per-team sums simple |
 | DB driver | psycopg 3 | Modern Postgres driver for Python |
@@ -55,9 +55,10 @@ Think of it as an **API gateway / reverse proxy built for LLM traffic**. It play
 
 ```
 llm-gateway/
-├── app/                # FastAPI gateway (blocks 2+)
+├── app/
+│   └── llm.py          # provider-neutral LLM client: complete() -> LLMResult
 ├── scripts/
-│   └── hello.py        # Block 1: first call to Claude
+│   └── hello.py        # Block 1: first call through app/llm.py
 ├── requirements.txt
 ├── .env.example        # copy to .env and fill in
 ├── plan.md             # build plan + progress
@@ -69,8 +70,21 @@ llm-gateway/
 ```bash
 python3 -m venv .venv && source .venv/bin/activate
 pip install -r requirements.txt
-cp .env.example .env        # then put your ANTHROPIC_API_KEY in .env
-python scripts/hello.py
+cp .env.example .env        # then put your key in LLM_API_KEY
+python -m scripts.hello     # prints reply + token counts
 ```
+
+## Provider-neutral by design
+
+Callers of the gateway never see provider names. Everything goes through `app/llm.py`:
+
+| Config (`.env`) | Meaning |
+|-----------------|---------|
+| `LLM_PROVIDER` | Which adapter to use (`anthropic` today) |
+| `LLM_API_KEY` | Upstream key (KodeKloud KodeKey or an Anthropic key) |
+| `LLM_BASE_URL` | Upstream URL (`https://api.ai.kodekloud.com` for KodeKey; empty for Anthropic direct) |
+| `LLM_MODEL` | Model id, e.g. `claude-sonnet-5-5` |
+
+`complete(prompt)` returns an `LLMResult` (`text`, `input_tokens`, `output_tokens`, `model`, `provider`, `cost_usd`). Every provider SDK is confined to its own adapter, so adding one is a single function and nothing else in the gateway changes.
 
 See [plan.md](plan.md) for the build plan.

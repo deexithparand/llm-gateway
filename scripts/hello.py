@@ -1,24 +1,20 @@
-"""Block 1: send "hello" to Claude, print the reply and token counts.
+"""Block 1: send "hello" to the LLM, print the reply and token counts.
 
-Run:  python scripts/hello.py
+Run from the repo root:  python -m scripts.hello
 Done when: the reply AND input/output token counts print.
 """
-import os
-
 from dotenv import load_dotenv
 
-load_dotenv()  # reads .env into environment variables (ANTHROPIC_API_KEY, CLAUDE_MODEL)
-MODEL = os.getenv("CLAUDE_MODEL", "claude-opus-5-5")
+load_dotenv()  # loads LLM_* settings from .env
 
-# TODO 1: import anthropic and create a client.
-#         No args needed: it reads ANTHROPIC_API_KEY from the environment.
+from app.llm import LLMError, complete  # noqa: E402  (needs env loaded first)
 
-# TODO 2: call client.messages.create(...) with
-#         model=MODEL, max_tokens=1024,
-#         messages=[ one dict: role "user", content "hello" ]
+try:
+    result = complete("hello")
+except LLMError as e:
+    raise SystemExit(f"LLM call failed ({e.status_code}): {e}")
 
-# TODO 3: response.content is a LIST of blocks. Loop over it and
-#         print block.text only when block.type == "text"
-#         (there may be a "thinking" block first).
-
-# TODO 4: print response.usage.input_tokens and response.usage.output_tokens
+print(f"[{result.provider} / {result.model}] {result.text}")
+print(f"tokens: input={result.input_tokens} output={result.output_tokens}", end="")
+print(f" cost=${result.cost_usd}" if result.cost_usd is not None else "")
+print(f"stop_reason: {result.stop_reason}")

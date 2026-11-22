@@ -4,7 +4,7 @@ Learn-by-doing plan for Sunday, 2026-11-22. Each block gets its own branch (`fea
 
 | # | Time | Block | What we build | Done when | Branch | Status |
 |---|------|-------|---------------|-----------|--------|--------|
-| 1 | 14:00–14:25 | LLM API basics | Python script sends "hello" to Claude | Reply + token counts print | `feature/01-llm-basics` | 🟡 In progress |
+| 1 | 14:00–14:25 | LLM API basics | Python script sends "hello" to Claude | Reply + token counts print | `feature/01-llm-basics` | ✅ Done |
 | 2 | 14:25–14:55 | FastAPI basics | `POST /chat` that echoes the input | Echo works via `/docs` | `feature/02-fastapi-echo` | ⬜ |
 | 3 | 14:55–15:25 | Connect them | `/chat` calls Claude and returns the reply | First mini gateway answers | `feature/03-chat-claude` | ⬜ |
 | — | 15:25–15:45 | Lunch | | | | |
